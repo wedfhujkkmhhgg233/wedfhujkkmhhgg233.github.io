@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jerome Jamis - Professional Profile</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            animation: gradient 15s ease infinite;
+            background-size: 400% 400%;
+            transition: background-color 0.3s ease;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body.dark-mode {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: #ffffff;
+        }
+
+        .profile-container {
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+            margin: auto;
+            transform: scale(1);
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out, background-color 0.3s ease;
+        }
+
+        body.dark-mode .profile-container {
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .profile-container:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .profile-picture {
+            border-radius: 50%;
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            margin-bottom: 20px;
+            border: 6px solid #ffffff;
+            box-shadow: 0 0 0 4px #ffffff, 0 0 0 6px #2575fc;
+        }
+
+        .profile-name {
+            font-size: 28px;
+            color: #333333;
+            margin-bottom: 10px;
+        }
+
+        body.dark-mode .profile-name {
+            color: #ffffff;
+        }
+
+        .verified-icon {
+            color: #1da1f2;
+            margin-left: 8px;
+        }
+
+        .motto {
+            font-style: italic;
+            color: #666666;
+            margin-bottom: 20px;
+        }
+
+        body.dark-mode .motto {
+            color: #dddddd;
+        }
+
+        .profile-details {
+            text-align: left;
+            color: #555555;
+            margin: 20px 0;
+        }
+
+        body.dark-mode .profile-details {
+            color: #cccccc;
+        }
+
+        .profile-details p {
+            margin-bottom: 10px;
+        }
+
+        .icons {
+            margin-top: 20px;
+        }
+
+        .icons a {
+            margin: 0 10px;
+            color: #2575fc;
+            transition: color 0.3s ease;
+        }
+
+        .icons a:hover {
+            color: #6a11cb;
+        }
+
+        .icons i {
+            font-size: 24px;
+        }
+
+        .btn-container {
+            margin-top: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background 0.5s;
+        }
+
+        .btn:hover {
+            background: linear-gradient(45deg, #2575fc, #6a11cb);
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            cursor: pointer;
+        }
+
+        .theme-toggle i {
+            font-size: 24px;
+            color: #ffffff;
+            transition: color 0.3s ease;
+        }
+
+        body.dark-mode .theme-toggle i {
+            color: #f1c40f;
+        }
+    </style>
+</head>
+<body>
+    <div class="theme-toggle" onclick="toggleTheme()">
+        <i class="fas fa-moon"></i>
+    </div>
+    <div class="profile-container">
+        <img class="profile-picture" src="https://graph.facebook.com/100092668630167/picture?height=720&width=720&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662" alt="Jerome Jamis">
+        <h1 class="profile-name">Jerome Jamis <i class="fas fa-check-circle verified-icon"></i></h1>
+        <p class="motto">"Embrace challenges with curiosity and determination."</p>
+        <div class="profile-details">
+            <p><strong>Born:</strong> April 25, 2010</p>
+            <p><strong>Hobbies:</strong> Coding, Playing</p>
+            <p><strong>Location:</strong> Philippines</p>
+        </div>
+        <div class="icons">
+            <a href="https://www.facebook.com/jeromethepro" target="_blank"><i class="fab fa-facebook"></i></a>
+            <a href="#" onclick="randomRedirect(event)" target="_blank"><i class="fab fa-twitter"></i></a>
+            <a href="#" onclick="randomRedirect(event)" target="_blank"><i class="fab fa-linkedin"></i></a>
+            <a href="https://github.com/wedfhujkkmhhgg233" target="_blank"><i class="fab fa-github"></i></a>
+        </div>
+        <div class="btn-container">
+            <a href="https://sim-api-ctqz.onrender.com/" class="btn" target="_blank">Sim Api</a>
+        </div>
+    </div>
+
+    <script>
+        function randomRedirect(event) {
+            event.preventDefault();
+            const links = [
+                "https://sim-api-ctqz.onrender.com/",
+                "https://simapi-mk9vq7hq.b4a.run/"
+            ];
+            const randomLink = links[Math.floor(Math.random() * links.length)];
+            window.open(randomLink, "_blank");
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle("dark-mode");
+            const icon = document.querySelector(".theme-toggle i");
+            if (document.body.classList.contains("dark-mode")) {
+                icon.classList.remove("fa-moon");
+                icon.classList.add("fa-sun");
+            } else {
+                icon.classList.remove("fa-sun");
+                icon.classList.add("fa-moon");
+            }
+        }
+    </script>
+</body>
+  </html>
