@@ -18,9 +18,10 @@
     fetch(`https://simsimi.ooguy.com/sim?query=${encodeURIComponent(query)}`)
       .then(res => res.json())
       .then(data => {
-        const response = data?.response || 'No response';
-        console.log(`[LOG] ${query} => ${response}`);
-        output.innerText = response;
+        // Show the entire JSON response formatted nicely
+        const jsonString = JSON.stringify(data, null, 2);
+        console.log(`[LOG] ${query} =>`, data);
+        output.innerText = jsonString;
       })
       .catch(err => {
         console.error('[ERROR]', err);
