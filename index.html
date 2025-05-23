@@ -5,7 +5,7 @@
   <title>Simsimi API Proxy</title>
 </head>
 <body>
-<pre id="output">Loading...</pre>
+<pre id="output"></pre>
 
 <script>
   const output = document.getElementById('output');
@@ -15,10 +15,11 @@
   if (!query) {
     output.innerText = 'Missing ?q= parameter';
   } else {
+    output.innerText = ''; // Clear before fetching
+
     fetch(`https://simsimi.ooguy.com/sim?query=${encodeURIComponent(query)}`)
       .then(res => res.json())
       .then(data => {
-        // Show the entire JSON response formatted nicely
         const jsonString = JSON.stringify(data, null, 2);
         console.log(`[LOG] ${query} =>`, data);
         output.innerText = jsonString;
