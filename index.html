@@ -1,25 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Full Website Renderer</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Simsimi Dynamic Fetch</title>
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      overflow: hidden;
-      background: black;
+    body {
+      font-family: sans-serif;
+      background: #f4f4f4;
+      padding: 40px;
+      text-align: center;
     }
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: block;
+    #result {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      display: inline-block;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
-  <iframe src="https://simsimi.ooguy.com"></iframe>
+  <h1>Simsimi Auto Query</h1>
+  <div id="result">Fetching...</div>
+
+  <script>
+    // Get the last part of the URL path (e.g. "hi" from /hi)
+    const path = window.location.pathname.replace(/^\/+|\/+$/g, '');
+
+    if (!path) {
+      document.getElementById('result').innerText = 'No query provided in URL.';
+    } else {
+      fetch(`https://simsimi.ooguy.com/sim?query=${encodeURIComponent(path)}`)
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById('result').innerText = data?.response || 'No response.';
+        })
+        .catch(err => {
+          document.getElementById('result').innerText = 'Error: ' + err.message;
+        });
+    }
+  </script>
 </body>
 </html>
