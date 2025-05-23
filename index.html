@@ -2,42 +2,31 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Simsimi Dynamic Fetch</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Simsimi Query</title>
   <style>
-    body {
-      font-family: sans-serif;
-      background: #f4f4f4;
-      padding: 40px;
-      text-align: center;
-    }
-    #result {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      display: inline-block;
-      margin-top: 20px;
-    }
+    body { font-family: sans-serif; padding: 30px; background: #f0f0f0; }
+    #result { background: white; padding: 15px; border-radius: 5px; margin-top: 20px; }
   </style>
 </head>
 <body>
-  <h1>Simsimi Auto Query</h1>
-  <div id="result">Fetching...</div>
+  <h1>Simsimi Query</h1>
+  <div id="result">Loading...</div>
 
   <script>
-    // Get the last part of the URL path (e.g. "hi" from /hi)
-    const path = window.location.pathname.replace(/^\/+|\/+$/g, '');
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('q');
 
-    if (!path) {
-      document.getElementById('result').innerText = 'No query provided in URL.';
+    if (!q) {
+      document.getElementById('result').innerText = 'Please add ?q=your_query in URL.';
     } else {
-      fetch(`https://simsimi.ooguy.com/sim?query=${encodeURIComponent(path)}`)
-        .then(res => res.json())
+      fetch(`https://simsimi.ooguy.com/sim?query=${encodeURIComponent(q)}`)
+        .then(r => r.json())
         .then(data => {
-          document.getElementById('result').innerText = data?.response || 'No response.';
+          document.getElementById('result').innerText = data?.response || 'No response';
         })
-        .catch(err => {
-          document.getElementById('result').innerText = 'Error: ' + err.message;
+        .catch(e => {
+          document.getElementById('result').innerText = 'Error: ' + e.message;
         });
     }
   </script>
