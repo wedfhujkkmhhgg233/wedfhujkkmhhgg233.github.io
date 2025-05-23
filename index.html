@@ -1,34 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Simsimi Query</title>
-  <style>
-    body { font-family: sans-serif; padding: 30px; background: #f0f0f0; }
-    #result { background: white; padding: 15px; border-radius: 5px; margin-top: 20px; }
-  </style>
+  <meta charset="UTF-8">
+  <title>Simsimi API Proxy</title>
 </head>
 <body>
-  <h1>Simsimi Query</h1>
-  <div id="result">Loading...</div>
+<pre id="output">Loading...</pre>
 
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const q = params.get('q');
+<script>
+  const output = document.getElementById('output');
+  const params = new URLSearchParams(window.location.search);
+  const query = params.get('q');
 
-    if (!q) {
-      document.getElementById('result').innerText = 'Please add ?q=your_query in URL.';
-    } else {
-      fetch(`https://simsimi.ooguy.com/sim?query=${encodeURIComponent(q)}`)
-        .then(r => r.json())
-        .then(data => {
-          document.getElementById('result').innerText = data?.response || 'No response';
-        })
-        .catch(e => {
-          document.getElementById('result').innerText = 'Error: ' + e.message;
-        });
-    }
-  </script>
+  if (!query) {
+    output.innerText = 'Missing ?q= parameter';
+  } else {
+    fetch(`https://simsimi.ooguy.com/sim?query=${encodeURIComponent(query)}`)
+      .then(res => res.json())
+      .then(data => {
+        const response = data?.response || 'No response';
+        console.log(`[LOG] ${query} => ${response}`);
+        output.innerText = response;
+      })
+      .catch(err => {
+        console.error('[ERROR]', err);
+        output.innerText = 'Error: ' + err.message;
+      });
+  }
+</script>
 </body>
 </html>
