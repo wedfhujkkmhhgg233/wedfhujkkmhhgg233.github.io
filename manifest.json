@@ -1,0 +1,15 @@
+{
+  "name": "Grow A Garden Live Dashboard",
+  "short_name": "GrowGarden",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#22c55e",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2909/2909591.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
