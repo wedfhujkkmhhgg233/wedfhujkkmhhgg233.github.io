@@ -1,25 +1,208 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" class="dark">
 <head>
-  <title>simsimi</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🌱 Grow A Garden Live Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://kit.fontawesome.com/2a4b4e8b0a.js" crossorigin="anonymous"></script>
+  <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2909/2909591.png" />
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#22c55e" />
+
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: transparent;
-      height: 100%;
-      overflow: hidden;
+    .glass {
+      background: rgba(31, 41, 55, 0.6);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
-    iframe {
-      width: 100%;
-      height: 100vh;
-      border: none;
+    .fa-spin-once {
+      animation: spinOnce 0.8s linear;
+    }
+    @keyframes spinOnce {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    #install-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #22c55e;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 9999px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+      font-weight: bold;
+      z-index: 50;
+      cursor: pointer;
+      user-select: none;
       display: block;
+      transition: background-color 0.3s ease;
+    }
+    #install-btn:hover {
+      background: #16a34a;
     }
   </style>
 </head>
-<body>
-  <iframe src="https://simsimi.ooguy.com"></iframe>
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white min-h-screen font-sans relative">
+
+  <div class="max-w-7xl mx-auto px-4 py-6">
+    <header class="flex items-center justify-between mb-10">
+      <h1 class="text-4xl font-extrabold flex items-center gap-3 text-green-400 drop-shadow">
+        <i class="fas fa-seedling"></i> Grow A Garden Live Dashboard
+      </h1>
+      <div>
+        <button id="refresh-btn" class="bg-gray-700 hover:bg-green-500 hover:text-white px-4 py-2 rounded-lg transition-all duration-300 shadow-md">
+          <i class="fas fa-sync-alt text-xl"></i>
+        </button>
+      </div>
+    </header>
+
+    <main id="dashboard" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Cards rendered here -->
+    </main>
+
+    <footer class="mt-12 text-center text-sm text-gray-400">
+      Last updated: <time id="last-updated">—</time>
+    </footer>
+  </div>
+
+  <!-- Install Button -->
+  <button id="install-btn" title="Install this app">
+    <i class="fas fa-download mr-2"></i> Install App
+  </button>
+
+  <script>
+    const refreshBtn = document.getElementById('refresh-btn');
+    const dashboard = document.getElementById('dashboard');
+    const updatedTime = document.getElementById('last-updated');
+    const installBtn = document.getElementById('install-btn');
+
+    let socket;
+    let deferredPrompt;
+
+    // Handle beforeinstallprompt event
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+    });
+
+    installBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          console.log("✅ App installed");
+          installBtn.style.display = 'none';
+        }
+        deferredPrompt = null;
+      } else {
+        alert("Install prompt not available. Your browser may not support it or the app is already installed.");
+      }
+    });
+
+    // Request notification permission on page load
+    window.addEventListener('load', () => {
+      if ('Notification' in window) {
+        if (Notification.permission === 'default') {
+          Notification.requestPermission().then(permission => {
+            console.log('Notification permission:', permission);
+          });
+        }
+      }
+    });
+
+    function notifyUser(title, options) {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification(title, options);
+      }
+    }
+
+    function connectWebSocket() {
+      socket = new WebSocket("wss://gagstock.gleeze.com");
+
+      socket.onopen = () => {
+        console.log("✅ Connected to WebSocket");
+        refreshBtn.classList.add("fa-spin-once");
+        setTimeout(() => refreshBtn.classList.remove("fa-spin-once"), 800);
+      };
+
+      socket.onmessage = (event) => {
+        try {
+          const json = JSON.parse(event.data);
+          renderDashboard(json.data);
+          updatedTime.textContent = new Date(json.updated_at).toLocaleString("en-PH", { timeZone: "Asia/Manila" });
+
+          // Notify user of new update
+          notifyUser('Grow A Garden Update', {
+            body: `Dashboard updated at ${updatedTime.textContent}`,
+            icon: 'https://cdn-icons-png.flaticon.com/512/2909/2909591.png'
+          });
+
+        } catch (err) {
+          console.error("❌ Invalid data from WebSocket:", err);
+        }
+      };
+
+      socket.onerror = (err) => console.error("WebSocket error:", err);
+
+      socket.onclose = () => {
+        console.warn("🔌 WebSocket closed. Reconnecting in 5s...");
+        setTimeout(connectWebSocket, 5000);
+      };
+    }
+
+    function renderDashboard(data) {
+      dashboard.innerHTML = '';
+      Object.entries(data).forEach(([key, value]) => {
+        if (key === 'updated_at') return;
+        const card = document.createElement('div');
+        card.className = "glass p-5 rounded-xl shadow-lg transform transition hover:scale-[1.03] hover:shadow-2xl";
+        card.innerHTML = `
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold capitalize">
+              <i class="fas fa-box-open mr-2 text-green-400"></i>${key}
+            </h2>
+            <span class="text-sm text-gray-300">${value.countdown || ''}</span>
+          </div>
+          <ul class="space-y-2">
+            ${value.items.map(item => `
+              <li class="flex items-center gap-3 p-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition">
+                ${item.image 
+                  ? `<img src="${item.image}" class="w-8 h-8 rounded-full object-cover" />`
+                  : `<span class="text-2xl">${item.emoji || '❓'}</span>`}
+                <div class="flex-1">
+                  <p class="font-medium">${item.name}</p>
+                </div>
+                <span class="text-sm text-green-300 font-mono">${item.quantity}</span>
+              </li>
+            `).join('')}
+          </ul>
+        `;
+        dashboard.appendChild(card);
+      });
+    }
+
+    refreshBtn.addEventListener('click', () => {
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        refreshBtn.classList.add("fa-spin-once");
+        setTimeout(() => refreshBtn.classList.remove("fa-spin-once"), 800);
+      } else {
+        alert("WebSocket not connected. Trying to reconnect...");
+        connectWebSocket();
+      }
+    });
+
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./service-worker.js')
+      .then(() => console.log('Service Worker Registered'))
+      .catch(console.error);
+    }
+
+    connectWebSocket();
+  </script>
 </body>
 </html>
