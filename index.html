@@ -6,44 +6,22 @@
   <title>🌱 Grow A Garden Live Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://kit.fontawesome.com/2a4b4e8b0a.js" crossorigin="anonymous"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
   <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2909/2909591.png" />
-  
-  <!-- PWA Manifest -->
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#22c55e" />
-
   <style>
-    .glass {
-      background: rgba(31, 41, 55, 0.6);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    .fa-spin-once {
-      animation: spinOnce 0.8s linear;
-    }
-    @keyframes spinOnce {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
+    .glass { background: rgba(31,41,55,0.6); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
+    .fa-spin-once { animation: spinOnce 0.8s linear; }
+    @keyframes spinOnce { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     #install-btn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: #22c55e;
-      color: white;
-      padding: 12px 18px;
-      border-radius: 9999px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-      font-weight: bold;
-      z-index: 50;
-      cursor: pointer;
-      user-select: none;
-      display: block;
+      position: fixed; bottom: 20px; right: 20px; background: #22c55e; color: white;
+      padding: 12px 18px; border-radius: 9999px; box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+      font-weight: bold; z-index: 50; cursor: pointer; user-select: none; display: block;
       transition: background-color 0.3s ease;
     }
-    #install-btn:hover {
-      background: #16a34a;
-    }
+    #install-btn:hover { background: #16a34a; }
   </style>
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white min-h-screen font-sans relative">
@@ -60,21 +38,36 @@
       </div>
     </header>
 
-    <main id="dashboard" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-      <!-- Cards rendered here -->
-    </main>
+    <main id="dashboard" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></main>
 
     <footer class="mt-12 text-center text-sm text-gray-400">
       Last updated: <time id="last-updated">—</time>
     </footer>
   </div>
 
-  <!-- Install Button -->
   <button id="install-btn" title="Install this app">
     <i class="fas fa-download mr-2"></i> Install App
   </button>
 
   <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyCILMYzPgrZBqqG7RICUw9hXSfo-eWEY6I",
+      authDomain: "jerdev-d994c.firebaseapp.com",
+      projectId: "jerdev-d994c",
+      storageBucket: "jerdev-d994c.firebasestorage.app",
+      messagingSenderId: "372542667899",
+      appId: "1:372542667899:web:e3f7ce3c0662cd41ed36de",
+      measurementId: "G-JG6RYS9HT7"
+    });
+
+    const messaging = firebase.messaging();
+    messaging.onMessage((payload) => {
+      new Notification(payload.notification.title, {
+        body: payload.notification.body,
+        icon: payload.notification.icon
+      });
+    });
+
     const refreshBtn = document.getElementById('refresh-btn');
     const dashboard = document.getElementById('dashboard');
     const updatedTime = document.getElementById('last-updated');
@@ -83,7 +76,6 @@
     let socket;
     let deferredPrompt;
 
-    // Handle beforeinstallprompt event
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
@@ -93,24 +85,14 @@
       if (deferredPrompt) {
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-          console.log("✅ App installed");
-          installBtn.style.display = 'none';
-        }
+        if (outcome === 'accepted') installBtn.style.display = 'none';
         deferredPrompt = null;
-      } else {
-        alert("Install prompt not available. Your browser may not support it or the app is already installed.");
       }
     });
 
-    // Request notification permission on page load
     window.addEventListener('load', () => {
-      if ('Notification' in window) {
-        if (Notification.permission === 'default') {
-          Notification.requestPermission().then(permission => {
-            console.log('Notification permission:', permission);
-          });
-        }
+      if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
       }
     });
 
@@ -122,36 +104,23 @@
 
     function connectWebSocket() {
       socket = new WebSocket("wss://gagstock.gleeze.com");
-
       socket.onopen = () => {
-        console.log("✅ Connected to WebSocket");
         refreshBtn.classList.add("fa-spin-once");
         setTimeout(() => refreshBtn.classList.remove("fa-spin-once"), 800);
       };
-
       socket.onmessage = (event) => {
         try {
           const json = JSON.parse(event.data);
           renderDashboard(json.data);
           updatedTime.textContent = new Date(json.updated_at).toLocaleString("en-PH", { timeZone: "Asia/Manila" });
-
-          // Notify user of new update
           notifyUser('Grow A Garden Update', {
             body: `Dashboard updated at ${updatedTime.textContent}`,
             icon: 'https://cdn-icons-png.flaticon.com/512/2909/2909591.png'
           });
-
-        } catch (err) {
-          console.error("❌ Invalid data from WebSocket:", err);
-        }
+        } catch (err) {}
       };
-
-      socket.onerror = (err) => console.error("WebSocket error:", err);
-
-      socket.onclose = () => {
-        console.warn("🔌 WebSocket closed. Reconnecting in 5s...");
-        setTimeout(connectWebSocket, 5000);
-      };
+      socket.onerror = () => {};
+      socket.onclose = () => setTimeout(connectWebSocket, 5000);
     }
 
     function renderDashboard(data) {
@@ -190,16 +159,18 @@
         refreshBtn.classList.add("fa-spin-once");
         setTimeout(() => refreshBtn.classList.remove("fa-spin-once"), 800);
       } else {
-        alert("WebSocket not connected. Trying to reconnect...");
         connectWebSocket();
       }
     });
 
-    // Register Service Worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./service-worker.js')
-      .then(() => console.log('Service Worker Registered'))
-      .catch(console.error);
+      .then((reg) => {
+        messaging.getToken({ 
+          vapidKey: 'BOIxIyZfttmSvSCWsmPdDzJiPrrhvOBn_BevQ-XjfySWFyQeDW58Xa0ft7OInnFJdcCki_ajtElqG9ApUD1PUg8',
+          serviceWorkerRegistration: reg
+        });
+      });
     }
 
     connectWebSocket();
